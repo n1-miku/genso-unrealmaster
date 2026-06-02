@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>元素マスタークイズ Pro+</title>
+    <title>元素＆化学式マスタークイズ Pro+ 受験特化版</title>
     <style>
         :root {
             --primary-color: #4a90e2;
             --success-color: #2ec4b6;
             --danger-color: #e71d36;
+            --exam-color: #e67e22;
             --bg-color: #f4f7f6;
             --card-bg: #ffffff;
             --text-color: #333333;
@@ -32,7 +33,7 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.08);
             padding: 30px;
             width: 100%;
-            max-width: 500px;
+            max-width: 550px;
             text-align: center;
             box-sizing: border-box;
         }
@@ -87,7 +88,6 @@
             margin-right: 6px;
         }
 
-        /* 特訓モード用の目立つスタイル */
         .special-box {
             grid-column: span 2;
             background: #fff0f0;
@@ -108,7 +108,6 @@
         }
 
         .btn {
-            background-color: var(--primary-color);
             color: white;
             border: none;
             padding: 12px 24px;
@@ -131,6 +130,10 @@
 
         .mode-btn {
             background-color: #6c757d;
+        }
+
+        .exam-btn {
+            background-color: var(--exam-color);
         }
 
         .quiz-status {
@@ -164,9 +167,14 @@
         }
 
         .question-target {
-            font-size: 42px;
+            font-size: 36px;
             font-weight: bold;
             color: #222;
+        }
+
+        .chemical-formula {
+            font-family: 'Times New Roman', Times, serif;
+            letter-spacing: 1px;
         }
 
         .choice-btn {
@@ -199,18 +207,85 @@
             font-weight: bold;
             margin: 20px 0;
         }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #444;
+            margin: 15px 0 8px 0;
+            text-align: left;
+            border-left: 4px solid var(--primary-color);
+            padding-left: 8px;
+        }
+        .exam-border {
+            border-left-color: var(--exam-color);
+        }
+
+        /* 復習セクションのスタイル */
+        .review-section {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .review-title {
+            font-size: 15px;
+            font-weight: bold;
+            color: #555;
+            margin-top: 0;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 5px;
+        }
+
+        .review-item {
+            font-size: 14px;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #e9ecef;
+        }
+
+        .review-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .review-q {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .review-ans {
+            margin-top: 3px;
+        }
+
+        .text-wrong {
+            color: var(--danger-color);
+            font-weight: bold;
+        }
+
+        .text-correct {
+            color: var(--success-color);
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🧪 元素クイズ</h1>
+    <h1>🧪 化学・元素マスタークイズ Pro+</h1>
 
     <div id="menu-screen" class="menu-group active">
         <p style="color: #666; margin-bottom: 20px;">条件を設定してモードを選んでください（全10問）</p>
         
         <div class="setting-section">
-            <h3>📅 出題範囲の選択</h3>
+            <h3>📅 出題範囲の選択（元素クイズ用）</h3>
             <div class="checkbox-grid">
                 <label class="checkbox-label special-box"><input type="checkbox" id="trap-only-checkbox" onchange="togglePeriodCheckboxes(this)">⚠️ まぎらわしい元素（特訓）</label>
                 
@@ -235,8 +310,13 @@
             </select>
         </div>
 
+        <div class="section-title">ベーシック元素クイズ</div>
         <button class="btn mode-btn" onclick="preStartQuiz('symbol')">🔠 元素記号をあてるモード</button>
         <button class="btn mode-btn" onclick="preStartQuiz('name')">🗣️ 元素名をあてるモード</button>
+
+        <div class="section-title exam-border">🎓 大学受験レベル 化学式クイズ</div>
+        <button class="btn exam-btn" onclick="preStartQuiz('formula')">📝 化学式をあてるモード</button>
+        <button class="btn exam-btn" onclick="preStartQuiz('chemicalName')">🏷️ 物質名をあてるモード</button>
     </div>
 
     <div id="quiz-screen" class="quiz-group">
@@ -247,8 +327,8 @@
         </div>
         
         <div class="question-box">
-            <div id="question-hint" class="question-text">この元素の元素記号は？</div>
-            <div id="question-display" class="question-target">H</div>
+            <div id="question-hint" class="question-text">この物質の化学式は？</div>
+            <div id="question-display" class="question-target">H₂O</div>
         </div>
 
         <div id="choices-container">
@@ -263,12 +343,18 @@
         <h2>🎉 クイズ修了！</h2>
         <div id="final-score" class="result-score">10問中 0問正解</div>
         <p id="result-comment"></p>
-        <button class="btn" onclick="backToMenu()">メニューに戻る</button>
+
+        <div class="review-section">
+            <div class="review-title">🔍 今回間違えた問題の復習</div>
+            <div id="review-list"></div>
+        </div>
+
+        <button class="btn" style="background-color: var(--primary-color);" onclick="backToMenu()">メニューに戻る</button>
     </div>
 </div>
 
 <script>
-// 118種類の元素データ（すべての要素に正しい period を補完・設定）
+// 118種類の元素データ
 const elementsData = [
     { num: 1, symbol: "H", name: "水素", period: 1 }, { num: 2, symbol: "He", name: "ヘリウム", period: 1 },
     { num: 3, symbol: "Li", name: "リチウム", period: 2 }, { num: 4, symbol: "Be", name: "ベリリウム", period: 2 },
@@ -331,18 +417,81 @@ const elementsData = [
     { num: 117, symbol: "Ts", name: "テネシン", period: 7 }, { num: 118, symbol: "Og", name: "オガネソン", period: 7 }
 ];
 
+// 大学受験向けの化学式・物質名データ
+const chemicalData = [
+    { formula: "H2O", name: "水", trapGroup: "oxygen-comp" },
+    { formula: "H2O2", name: "過酸化水素", trapGroup: "oxygen-comp" },
+    { formula: "CO2", name: "二酸化炭素", trapGroup: "carbon-comp" },
+    { formula: "CO", name: "一酸化炭素", trapGroup: "carbon-comp" },
+    { formula: "HCl", name: "塩化水素（塩酸）", trapGroup: "acid-strong" },
+    { formula: "H2SO4", name: "硫酸", trapGroup: "acid-strong" },
+    { formula: "HNO3", name: "硝酸", trapGroup: "acid-strong" },
+    { formula: "H2CO3", name: "炭酸", trapGroup: "acid-weak" },
+    { formula: "H2S", name: "硫化水素", trapGroup: "acid-weak" },
+    { formula: "H3PO4", name: "リン酸", trapGroup: "acid-weak" },
+    { formula: "NaOH", name: "水酸化ナトリウム", trapGroup: "base-strong" },
+    { formula: "KOH", name: "水酸化カリウム", trapGroup: "base-strong" },
+    { formula: "Ca(OH)2", name: "水酸化カルシウム（消石灰）", trapGroup: "base-strong" },
+    { formula: "Ba(OH)2", name: "水酸化バリウム", trapGroup: "base-strong" },
+    { formula: "NH3", name: "アンモニア", trapGroup: "base-weak" },
+    { formula: "Al(OH)3", name: "水酸化アルミニウム", trapGroup: "amphoteric" },
+    { formula: "Zn(OH)2", name: "水酸化亜鉛", trapGroup: "amphoteric" },
+    { formula: "NaCl", name: "塩化ナトリウム", trapGroup: "salt-na" },
+    { formula: "Na2CO3", name: "炭酸ナトリウム", trapGroup: "salt-na" },
+    { formula: "NaHCO3", name: "炭酸水素ナトリウム（重曹）", trapGroup: "salt-na" },
+    { formula: "CaCO3", name: "炭酸カルシウム（石灰石）", trapGroup: "salt-ca" },
+    { formula: "CaSO4", name: "硫酸カルシウム（石膏）", trapGroup: "salt-ca" },
+    { formula: "CaO", name: "酸化カルシウム（生石灰）", trapGroup: "salt-ca" },
+    { formula: "CaCl2", name: "塩化カルシウム", trapGroup: "salt-ca" },
+    { formula: "SO2", name: "二酸化硫黄", trapGroup: "sulfur-comp" },
+    { formula: "SO3", name: "三酸化硫黄", trapGroup: "sulfur-comp" },
+    { formula: "NO", name: "一酸化窒素", trapGroup: "nitrogen-comp" },
+    { formula: "NO2", name: "二酸化窒素", trapGroup: "nitrogen-comp" },
+    { formula: "HF", name: "フッ化水素", trapGroup: "halogen-acid" },
+    { formula: "SiO2", name: "二酸化ケイ素", trapGroup: "silicon" },
+    { formula: "KMnO4", name: "過マンガン酸カリウム", trapGroup: "oxidizer" },
+    { formula: "K2Cr2O7", name: "二クロム酸カリウム", trapGroup: "oxidizer" },
+    { formula: "Fe2O3", name: "酸化鉄(Ⅲ)（赤サビ）", trapGroup: "iron-comp" },
+    { formula: "Fe3O4", name: "四酸化三鉄（黒サビ）", trapGroup: "iron-comp" },
+    { formula: "CuSO4", name: "硫酸銅(Ⅱ)", trapGroup: "copper-comp" },
+    { formula: "CH4", name: "メタン", trapGroup: "alkane" },
+    { formula: "C2H6", name: "エタン", trapGroup: "alkane" },
+    { formula: "C3H8", name: "プロパン", trapGroup: "alkane" },
+    { formula: "C2H4", name: "エチレン", trapGroup: "alkene" },
+    { formula: "C2H2", name: "アセチレン", trapGroup: "alkyne" },
+    { formula: "CH3OH", name: "メタノール", trapGroup: "alcohol" },
+    { formula: "C2H5OH", name: "エタノール", trapGroup: "alcohol" },
+    { formula: "CH3OCH3", name: "ジメチルエーテル", trapGroup: "ether" },
+    { formula: "C2H5OC2H5", name: "ジエチルエーテル", trapGroup: "ether" },
+    { formula: "HCHO", name: "ホルムアルデヒド", trapGroup: "aldehyde" },
+    { formula: "CH3CHO", name: "アセトアルデヒド", trapGroup: "aldehyde" },
+    { formula: "CH3COCH3", name: "アセトン", trapGroup: "ketone" },
+    { formula: "HCOOH", name: "ギ酸", trapGroup: "carboxylic" },
+    { formula: "CH3COOH", name: "酢酸", trapGroup: "carboxylic" },
+    { formula: "CH3COOC2H5", name: "酢酸エチル", trapGroup: "ester" },
+    { formula: "C6H6", name: "ベンゼン", trapGroup: "aromatic" },
+    { formula: "C6H5OH", name: "フェノール", trapGroup: "aromatic" },
+    { formula: "C6H5CH3", name: "トルエン", trapGroup: "aromatic" },
+    { formula: "C6H5COOH", name: "安息香酸", trapGroup: "aromatic" },
+    { formula: "C6H5NH2", name: "アニリン", trapGroup: "aromatic-n" },
+    { formula: "C6H5NO2", name: "ニトロベンゼン", trapGroup: "aromatic-n" },
+    { formula: "C6H12O6", name: "グルコース（ブドウ糖）", trapGroup: "sugar" },
+    { formula: "C12H22O11", name: "スクロース（ショ糖）", trapGroup: "sugar" }
+];
+
 let currentMode = ''; 
 let quizQuestions = [];
 let currentQuestionIndex = 0;
 let score = 0;
 let isAnswered = false;
-let isTrapMode = false; // 特訓モードフラグ
+let isTrapMode = false;
 
 let timeLimitPerQuestion = 0; 
 let currentRemainingTime = 0;
 let timerIntervalId = null;
 
-// 特訓モードにチェックが入ったら通常の周期チェックを外す連動処理
+let wrongQuestionsLog = []; // 間違えた問題を保存する配列
+
 function togglePeriodCheckboxes(trapCheckbox) {
     const checkboxes = document.querySelectorAll('.period-checkbox');
     checkboxes.forEach(cb => {
@@ -353,32 +502,41 @@ function togglePeriodCheckboxes(trapCheckbox) {
     });
 }
 
-// 開始前の設定チェック
+function formatFormula(formula) {
+    return formula.replace(/([A-Za-z\)]+)(\d+)/g, function(match, p1, p2) {
+        return p1 + p2.split('').map(num => `<sub>${num}</sub>`).join('');
+    });
+}
+
 function preStartQuiz(mode) {
     const trapCheckbox = document.getElementById('trap-only-checkbox');
     isTrapMode = trapCheckbox.checked;
     
-    let filteredElements = [];
+    let filteredData = [];
 
-    if (isTrapMode) {
-        // trapGroupが定義されている「紛らわしい元素」だけを抽出（計43種）
-        filteredElements = elementsData.filter(el => el.trapGroup !== undefined);
-    } else {
-        const checkboxes = document.querySelectorAll('.period-checkbox:checked');
-        const selectedPeriods = Array.from(checkboxes).map(cb => parseInt(cb.value));
+    if (mode === 'formula' || mode === 'chemicalName') {
+        filteredData = [...chemicalData];
+    } 
+    else {
+        if (isTrapMode) {
+            filteredData = elementsData.filter(el => el.trapGroup !== undefined);
+        } else {
+            const checkboxes = document.querySelectorAll('.period-checkbox:checked');
+            const selectedPeriods = Array.from(checkboxes).map(cb => parseInt(cb.value));
 
-        if (selectedPeriods.length === 0) {
-            alert('少なくとも1つの周期、または特訓モードを選択してください！');
-            return;
+            if (selectedPeriods.length === 0) {
+                alert('少なくとも1つの周期、または特訓モードを選択してください！');
+                return;
+            }
+            filteredData = elementsData.filter(el => selectedPeriods.includes(el.period));
         }
-        filteredElements = elementsData.filter(el => selectedPeriods.includes(el.period));
     }
 
     const timerSetting = parseInt(document.getElementById('timer-setting').value);
     timeLimitPerQuestion = timerSetting;
 
-    const totalQuestionsCount = Math.min(filteredElements.length, 10);
-    const shuffled = [...filteredElements].sort(() => 0.5 - Math.random());
+    const totalQuestionsCount = Math.min(filteredData.length, 10);
+    const shuffled = [...filteredData].sort(() => 0.5 - Math.random());
     quizQuestions = shuffled.slice(0, totalQuestionsCount);
 
     startQuiz(mode);
@@ -389,6 +547,7 @@ function startQuiz(mode) {
     score = 0;
     currentQuestionIndex = 0;
     isAnswered = false;
+    wrongQuestionsLog = []; // ログを初期化
 
     document.getElementById('menu-screen').classList.remove('active');
     document.getElementById('quiz-screen').classList.add('active');
@@ -407,40 +566,48 @@ function showQuestion() {
     if (timerIntervalId) clearInterval(timerIntervalId);
     isAnswered = false;
     const currentQuestion = quizQuestions[currentQuestionIndex];
+    const displayTarget = document.getElementById('question-display');
     
     document.getElementById('progress-text').innerText = `第 ${currentQuestionIndex + 1} / ${quizQuestions.length} 問`;
     document.getElementById('score-text').innerText = `スコア: ${score}`;
 
+    displayTarget.classList.remove('chemical-formula');
+
     if (currentMode === 'symbol') {
         document.getElementById('question-hint').innerText = `次の元素の元素記号は？`;
-        document.getElementById('question-display').innerText = currentQuestion.name;
-    } else {
+        displayTarget.innerText = currentQuestion.name;
+    } else if (currentMode === 'name') {
         document.getElementById('question-hint').innerText = `元素記号「 ${currentQuestion.symbol} 」の元素名はどれ？`;
-        document.getElementById('question-display').innerText = currentQuestion.symbol;
+        displayTarget.innerText = currentQuestion.symbol;
+    } else if (currentMode === 'formula') {
+        document.getElementById('question-hint').innerText = `「 ${currentQuestion.name} 」の化学式はどれ？`;
+        displayTarget.innerText = currentQuestion.name;
+    } else if (currentMode === 'chemicalName') {
+        document.getElementById('question-hint').innerText = `この化学式が表す物質名はどれ？`;
+        displayTarget.innerHTML = formatFormula(currentQuestion.formula);
+        displayTarget.classList.add('chemical-formula');
     }
 
-    // 選択肢の生成ロジック
     let choices = [currentQuestion];
+    const dataSource = (currentMode === 'formula' || currentMode === 'chemicalName') ? chemicalData : elementsData;
+    const keyIdentifier = (currentMode === 'formula' || currentMode === 'chemicalName') ? 'formula' : 'num';
     
-    // 1. もし問題の元素がtrapGroup（似たグループ）を持っていたら、同じグループから優先してダミーを引っ張る
     if (currentQuestion.trapGroup) {
-        const sameGroupElements = elementsData.filter(el => el.trapGroup === currentQuestion.trapGroup && el.num !== currentQuestion.num);
-        sameGroupElements.sort(() => 0.5 - Math.random());
-        for (let el of sameGroupElements) {
-            if (choices.length < 4) choices.push(el);
+        const sameGroup = dataSource.filter(item => item.trapGroup === currentQuestion.trapGroup && item[keyIdentifier] !== currentQuestion[keyIdentifier]);
+        sameGroup.sort(() => 0.5 - Math.random());
+        for (let item of sameGroup) {
+            if (choices.length < 4) choices.push(item);
         }
     }
 
-    // 2. 4つに満たない場合は全体からランダムに補充
     while (choices.length < 4) {
-        const randomElement = elementsData[Math.floor(Math.random() * elementsData.length)];
-        if (!choices.some(e => e.num === randomElement.num)) {
-            choices.push(randomElement);
+        const randomItem = dataSource[Math.floor(Math.random() * dataSource.length)];
+        if (!choices.some(e => e[keyIdentifier] === randomItem[keyIdentifier])) {
+            choices.push(randomItem);
         }
     }
     choices.sort(() => 0.5 - Math.random());
 
-    // ボタンに反映
     const buttons = document.querySelectorAll('.choice-btn');
     buttons.forEach((btn, index) => {
         btn.className = 'btn choice-btn';
@@ -448,9 +615,19 @@ function showQuestion() {
         if (currentMode === 'symbol') {
             btn.innerText = choices[index].symbol;
             btn.dataset.isCorrect = (choices[index].symbol === currentQuestion.symbol);
-        } else {
+            btn.dataset.choiceDisplay = choices[index].symbol;
+        } else if (currentMode === 'name') {
             btn.innerText = choices[index].name;
             btn.dataset.isCorrect = (choices[index].name === currentQuestion.name);
+            btn.dataset.choiceDisplay = choices[index].name;
+        } else if (currentMode === 'formula') {
+            btn.innerHTML = formatFormula(choices[index].formula);
+            btn.dataset.isCorrect = (choices[index].formula === currentQuestion.formula);
+            btn.dataset.choiceDisplay = formatFormula(choices[index].formula); // 復習用HTML
+        } else if (currentMode === 'chemicalName') {
+            btn.innerText = choices[index].name;
+            btn.dataset.isCorrect = (choices[index].name === currentQuestion.name);
+            btn.dataset.choiceDisplay = choices[index].name;
         }
     });
 
@@ -475,6 +652,18 @@ function updateTimerDisplay() {
 function handleTimeOut() {
     if (isAnswered) return;
     isAnswered = true;
+    
+    const currentQuestion = quizQuestions[currentQuestionIndex];
+    let qText = '', cText = '';
+
+    // 復習表示用に整理
+    if (currentMode === 'symbol') { qText = currentQuestion.name; cText = currentQuestion.symbol; }
+    else if (currentMode === 'name') { qText = currentQuestion.symbol; cText = currentQuestion.name; }
+    else if (currentMode === 'formula') { qText = currentQuestion.name; cText = formatFormula(currentQuestion.formula); }
+    else if (currentMode === 'chemicalName') { qText = formatFormula(currentQuestion.formula); cText = currentQuestion.name; }
+
+    wrongQuestionsLog.push({ question: qText, yourAnswer: "時間切れ", correctAnswer: cText });
+
     const buttons = document.querySelectorAll('.choice-btn');
     buttons.forEach(btn => {
         if (btn.dataset.isCorrect === 'true') {
@@ -494,6 +683,13 @@ function selectAnswer(index) {
     const buttons = document.querySelectorAll('.choice-btn');
     const selectedButton = buttons[index];
     const isCorrect = selectedButton.dataset.isCorrect === 'true';
+    const currentQuestion = quizQuestions[currentQuestionIndex];
+
+    let qText = '', cText = '';
+    if (currentMode === 'symbol') { qText = currentQuestion.name; cText = currentQuestion.symbol; }
+    else if (currentMode === 'name') { qText = currentQuestion.symbol; cText = currentQuestion.name; }
+    else if (currentMode === 'formula') { qText = currentQuestion.name; cText = formatFormula(currentQuestion.formula); }
+    else if (currentMode === 'chemicalName') { qText = formatFormula(currentQuestion.formula); cText = currentQuestion.name; }
 
     if (isCorrect) {
         selectedButton.classList.add('correct');
@@ -504,6 +700,13 @@ function selectAnswer(index) {
             if (btn.dataset.isCorrect === 'true') {
                 btn.classList.add('correct');
             }
+        });
+        
+        // ログに保存
+        wrongQuestionsLog.push({
+            question: qText,
+            yourAnswer: selectedButton.dataset.choiceDisplay,
+            correctAnswer: cText
         });
     }
     goToNextQuestion();
@@ -529,21 +732,36 @@ function showResult() {
 
     let comment = '';
     const rate = score / quizQuestions.length;
-    if (rate === 1) {
-        comment = isTrapMode ? '👑 完璧！おめでとう！' : '🏆 全問正解！素晴らしい！';
-    } else if (rate >= 0.8) {
-        comment = '✨ 惜しい！';
-    } else if (rate >= 0.5) {
-        comment = '👍 悪くない！';
-    } else {
-        comment = '📚 もうちょっと頑張ろう！';
-    }
+    if (rate === 1) comment = '👑 素晴らしい！';
+    else if (rate >= 0.8) comment = '✨ その調子！';
+    else if (rate >= 0.5) comment = '👍 ケアレスミスに注意！';
+    else comment = '📚 もう少し復習しましょう！';
 
     document.getElementById('result-comment').innerText = comment;
+
+    // 復習リストの表示生成
+    const reviewListContainer = document.getElementById('review-list');
+    reviewListContainer.innerHTML = ''; 
+
+    if (wrongQuestionsLog.length === 0) {
+        reviewListContainer.innerHTML = '<p style="color: var(--success-color); font-weight: bold; margin:0;">🎉 全問正解です！</p>';
+    } else {
+        wrongQuestionsLog.forEach(item => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'review-item';
+            itemDiv.innerHTML = `
+                <div class="review-q">問題： ${item.question}</div>
+                <div class="review-ans">
+                    あなたの解答： <span class="text-wrong">${item.yourAnswer}</span> 
+                    / 正解： <span class="text-correct">${item.correctAnswer}</span>
+                </div>
+            `;
+            reviewListContainer.appendChild(itemDiv);
+        });
+    }
 }
 
 function backToMenu() {
-    // 特訓モードのチェックを外し、周期チェックボックスの無効化を解除して全チェックを入れるリセット処理
     const trapCheckbox = document.getElementById('trap-only-checkbox');
     if (trapCheckbox) {
         trapCheckbox.checked = false;
