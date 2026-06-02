@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>元素マスタークイズ Pro+</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --success-color: #2ec4b6;
+            --danger-color: #e71d36;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        .menu-group, .quiz-group {
+            display: none;
+        }
+
+        .active {
+            display: block;
+        }
+
+        .setting-section {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .setting-section h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 15px;
+            color: #555;
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .checkbox-label input {
+            margin-right: 6px;
+        }
+
+        /* 特訓モード用の目立つスタイル */
+        .special-box {
+            grid-column: span 2;
+            background: #fff0f0;
+            border: 1px dashed var(--danger-color);
+            padding: 6px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #c01127;
+        }
+
+        .select-input {
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            width: 100%;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+
+        .btn:hover {
+            filter: brightness(0.9);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .mode-btn {
+            background-color: #6c757d;
+        }
+
+        .quiz-status {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .timer-badge {
+            font-weight: bold;
+            color: var(--danger-color);
+            background: #ffe3e3;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .question-box {
+            background-color: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 30px 10px;
+            margin-bottom: 25px;
+        }
+
+        .question-text {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .question-target {
+            font-size: 42px;
+            font-weight: bold;
+            color: #222;
+        }
+
+        .choice-btn {
+            background-color: white;
+            color: var(--text-color);
+            border: 2px solid #e9ecef;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .choice-btn:hover {
+            background-color: #f8f9fa;
+            border-color: var(--primary-color);
+        }
+
+        .choice-btn.correct {
+            background-color: var(--success-color) !important;
+            color: white !important;
+            border-color: var(--success-color) !important;
+        }
+
+        .choice-btn.incorrect {
+            background-color: var(--danger-color) !important;
+            color: white !important;
+            border-color: var(--danger-color) !important;
+        }
+
+        .result-score {
+            font-size: 22px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🧪 元素クイズ</h1>
+
+    <div id="menu-screen" class="menu-group active">
+        <p style="color: #666; margin-bottom: 20px;">条件を設定してモードを選んでください（全10問）</p>
+        
+        <div class="setting-section">
+            <h3>📅 出題範囲の選択</h3>
+            <div class="checkbox-grid">
+                <label class="checkbox-label special-box"><input type="checkbox" id="trap-only-checkbox" onchange="togglePeriodCheckboxes(this)">⚠️ まぎらわしい元素（特訓）</label>
+                
+                <label class="checkbox-label"><input type="checkbox" class="period-checkbox" value="1" checked>第1周期 (1-2)</label>
+                <label class="checkbox-label"><input type="checkbox" class="period-checkbox" value="2" checked>第2周期 (3-10)</label>
+                <label class="checkbox-label"><input type="checkbox" class="period-checkbox" value="3" checked>第3周期 (11-18)</label>
+                <label class="checkbox-label"><input type="checkbox" class="period-checkbox" value="4" checked>第4周期 (19-36)</label>
+                <label class="checkbox-label"><input type="checkbox" class="period-checkbox" value="5" checked>第5周期 (37-54)</label>
+                <label class="checkbox-label"><input type="checkbox" class="period-checkbox" value="6" checked>第6周期 (55-86)</label>
+                <label class="checkbox-label"><input type="checkbox" class="period-checkbox" value="7" checked>第7周期 (87-118)</label>
+            </div>
+        </div>
+
+        <div class="setting-section">
+            <h3>⏱️ タイムアタック設定（1問あたり）</h3>
+            <select id="timer-setting" class="select-input">
+                <option value="0">制限時間なし（じっくり）</option>
+                <option value="15">15秒（標準）</option>
+                <option value="10">10秒（やや難）</option>
+                <option value="5">5秒（激ムズ）</option>
+                <option value="3">3秒（神の領域）</option>
+            </select>
+        </div>
+
+        <button class="btn mode-btn" onclick="preStartQuiz('symbol')">🔠 元素記号をあてるモード</button>
+        <button class="btn mode-btn" onclick="preStartQuiz('name')">🗣️ 元素名をあてるモード</button>
+    </div>
+
+    <div id="quiz-screen" class="quiz-group">
+        <div class="quiz-status">
+            <span id="progress-text">第 1 / 10 問</span>
+            <span id="timer-display" class="timer-badge" style="display: none;">⏱️ -- 秒</span>
+            <span id="score-text">スコア: 0</span>
+        </div>
+        
+        <div class="question-box">
+            <div id="question-hint" class="question-text">この元素の元素記号は？</div>
+            <div id="question-display" class="question-target">H</div>
+        </div>
+
+        <div id="choices-container">
+            <button class="btn choice-btn" onclick="selectAnswer(0)">選択肢 1</button>
+            <button class="btn choice-btn" onclick="selectAnswer(1)">選択肢 2</button>
+            <button class="btn choice-btn" onclick="selectAnswer(2)">選択肢 3</button>
+            <button class="btn choice-btn" onclick="selectAnswer(3)">選択肢 4</button>
+        </div>
+    </div>
+
+    <div id="result-screen" class="quiz-group">
+        <h2>🎉 クイズ修了！</h2>
+        <div id="final-score" class="result-score">10問中 0問正解</div>
+        <p id="result-comment"></p>
+        <button class="btn" onclick="backToMenu()">メニューに戻る</button>
+    </div>
+</div>
+
+<script>
+// 118種類の元素データ（すべての要素に正しい period を補完・設定）
+const elementsData = [
+    { num: 1, symbol: "H", name: "水素", period: 1 }, { num: 2, symbol: "He", name: "ヘリウム", period: 1 },
+    { num: 3, symbol: "Li", name: "リチウム", period: 2 }, { num: 4, symbol: "Be", name: "ベリリウム", period: 2 },
+    { num: 5, symbol: "B", name: "ホウ素", period: 2, trapGroup: "B" }, { num: 6, symbol: "C", name: "炭素", period: 2 },
+    { num: 7, symbol: "N", name: "窒素", period: 2, trapGroup: "N" }, { num: 8, symbol: "O", name: "酸素", period: 2 },
+    { num: 9, symbol: "F", name: "フッ素", period: 2, trapGroup: "F" }, { num: 10, symbol: "Ne", name: "ネオン", period: 2 },
+    { num: 11, symbol: "Na", name: "ナトリウム", period: 3, trapGroup: "N" }, { num: 12, symbol: "Mg", name: "マグネシウム", period: 3, trapGroup: "M" },
+    { num: 13, symbol: "Al", name: "アルミニウム", period: 3 }, { num: 14, symbol: "Si", name: "ケイ素", period: 3, trapGroup: "S" },
+    { num: 15, symbol: "P", name: "リン", period: 3, trapGroup: "P" }, { num: 16, symbol: "S", name: "硫黄", period: 3, trapGroup: "S" },
+    { num: 17, symbol: "Cl", name: "塩素", period: 3, trapGroup: "C" }, { num: 18, symbol: "Ar", name: "アルゴン", period: 3, trapGroup: "A" },
+    { num: 19, symbol: "K", name: "カリウム", period: 4, trapGroup: "K" }, { num: 20, symbol: "Ca", name: "カルシウム", period: 4, trapGroup: "C" },
+    { num: 21, symbol: "Sc", name: "スカンジウム", period: 4, trapGroup: "S" }, { num: 22, symbol: "Ti", name: "チタン", period: 4 },
+    { num: 23, symbol: "V", name: "バナジウム", period: 4 }, { num: 24, symbol: "Cr", name: "クロム", period: 4, trapGroup: "C" },
+    { num: 25, symbol: "Mn", name: "マンガン", period: 4, trapGroup: "M" }, { num: 26, symbol: "Fe", name: "鉄", period: 4, trapGroup: "F" },
+    { num: 27, symbol: "Co", name: "コバルト", period: 4, trapGroup: "C" }, { num: 28, symbol: "Ni", name: "ニッケル", period: 4 },
+    { num: 29, symbol: "Cu", name: "銅", period: 4, trapGroup: "C" }, { num: 30, symbol: "Zn", name: "亜鉛", period: 4 },
+    { num: 31, symbol: "Ga", name: "ガリウム", period: 4 }, { num: 32, symbol: "Ge", name: "ゲルマニウム", period: 4 },
+    { num: 33, symbol: "As", name: "ヒ素", period: 4, trapGroup: "A" }, { num: 34, symbol: "Se", name: "セレン", period: 4 },
+    { num: 35, symbol: "Br", name: "臭素", period: 4, trapGroup: "B" }, { num: 36, symbol: "Kr", name: "クリプトン", period: 4, trapGroup: "K" },
+    { num: 37, symbol: "Rb", name: "ルビジウム", period: 5 }, { num: 38, symbol: "Sr", name: "ストロンチウム", period: 5, trapGroup: "S" },
+    { num: 39, symbol: "Y", name: "イットリウム", period: 5 }, { num: 40, symbol: "Zr", name: "ジルコニウム", period: 5 },
+    { num: 41, symbol: "Nb", name: "ニオブ", period: 5 }, { num: 42, symbol: "Mo", name: "モリブデン", period: 5 },
+    { num: 43, symbol: "Tc", name: "テクネチウム", period: 5 }, { num: 44, symbol: "Ru", name: "ルテニウム", period: 5 },
+    { num: 45, symbol: "Rh", name: "ロジウム", period: 5 }, { num: 46, symbol: "Pd", name: "パラジウム", period: 5, trapGroup: "P" },
+    { num: 47, symbol: "Ag", name: "銀", period: 5, trapGroup: "A" }, { num: 48, symbol: "Cd", name: "カドミウム", period: 5 },
+    { num: 49, symbol: "In", name: "インジウム", period: 5 }, { num: 50, symbol: "Sn", name: "スズ", period: 5, trapGroup: "S" },
+    { num: 51, symbol: "Sb", name: "アンチモン", period: 5, trapGroup: "S" }, { num: 52, symbol: "Te", name: "テルル", period: 5 },
+    { num: 53, symbol: "I", name: "ヨウ素", period: 5 }, { num: 54, symbol: "Xe", name: "キセノン", period: 5 },
+    { num: 55, symbol: "Cs", name: "セシウム", period: 6 }, { num: 56, symbol: "Ba", name: "バリウム", period: 6, trapGroup: "B" },
+    { num: 57, symbol: "La", name: "ランタン", period: 6 }, { num: 58, symbol: "Ce", name: "セリウム", period: 6 },
+    { num: 59, symbol: "Pr", name: "プラセオジウム", period: 6 }, { num: 60, symbol: "Nd", name: "ネオジウム", period: 6 },
+    { num: 61, symbol: "Pm", name: "プロメチウム", period: 6, trapGroup: "P" }, { num: 62, symbol: "Sm", name: "サマリウム", period: 6 },
+    { num: 63, symbol: "Eu", name: "ユウロピウム", period: 6 }, { num: 64, symbol: "Gd", name: "ガドリニウム", period: 6 },
+    { num: 65, symbol: "Tb", name: "テルビウム", period: 6 }, { num: 66, symbol: "Dy", name: "ジスプロシウム", period: 6 },
+    { num: 67, symbol: "Ho", name: "ホルミウム", period: 6 }, { num: 68, symbol: "Er", name: "エルビウム", period: 6 },
+    { num: 69, symbol: "Tm", name: "ツリウム", period: 6 }, { num: 70, symbol: "Yb", name: "イッテルビウム", period: 6 },
+    { num: 71, symbol: "Lu", name: "ルテチウム", period: 6 }, { num: 72, symbol: "Hf", name: "ハフニウム", period: 6 },
+    { num: 73, symbol: "Ta", name: "タンタル", period: 6 }, { num: 74, symbol: "W", name: "タングステン", period: 6 },
+    { num: 75, symbol: "Re", name: "レニウム", period: 6 }, { num: 76, symbol: "Os", name: "オスミウム", period: 6 },
+    { num: 77, symbol: "Ir", name: "イリジウム", period: 6 }, { num: 78, symbol: "Pt", name: "白金", period: 6, trapGroup: "P" },
+    { num: 79, symbol: "Au", name: "金", period: 6, trapGroup: "A" }, { num: 80, symbol: "Hg", name: "水銀", period: 6 },
+    { num: 81, symbol: "Tl", name: "タリウム", period: 6 }, { num: 82, symbol: "Pb", name: "鉛", period: 6, trapGroup: "P" },
+    { num: 83, symbol: "Bi", name: "ビスマス", period: 6 }, { num: 84, symbol: "Po", name: "ポロニウム", period: 6, trapGroup: "P" },
+    { num: 85, symbol: "At", name: "アスタチン", period: 6 }, { num: 86, symbol: "Rn", name: "ラドン", period: 6 },
+    { num: 87, symbol: "Fr", name: "フランシウム", period: 7 }, { num: 88, symbol: "Ra", name: "ラジウム", period: 7 },
+    { num: 89, symbol: "Ac", name: "アクチニウム", period: 7 }, { num: 90, symbol: "Th", name: "トリウム", period: 7 },
+    { num: 91, symbol: "Pa", name: "プロトアクチニウム", period: 7 }, { num: 92, symbol: "U", name: "ウラン", period: 7 },
+    { num: 93, symbol: "Np", name: "ネプツニウム", period: 7 }, { num: 94, symbol: "Pu", name: "プルトニウム", period: 7 },
+    { num: 95, symbol: "Am", name: "アメリシウム", period: 7 }, { num: 96, symbol: "Cm", name: "キュリウム", period: 7 },
+    { num: 97, symbol: "Bk", name: "バークリウム", period: 7 }, { num: 98, symbol: "Cf", name: "カリホルニウム", period: 7 },
+    { num: 99, symbol: "Es", name: "アインシュタイニウム", period: 7 }, { num: 100, symbol: "Fm", name: "フェルミウム", period: 7 },
+    { num: 101, symbol: "Md", name: "メンデレビウム", period: 7 }, { num: 102, symbol: "No", name: "ノーベリウム", period: 7 },
+    { num: 103, symbol: "Lr", name: "ローレンシウム", period: 7 }, { num: 104, symbol: "Rf", name: "ラザホジウム", period: 7 },
+    { num: 105, symbol: "Db", name: "ドゥブニウム", period: 7 }, { num: 106, symbol: "Sg", name: "シーボーギウム", period: 7 },
+    { num: 107, symbol: "Bh", name: "ボーリウム", period: 7 }, { num: 108, symbol: "Hs", name: "ハッシウム", period: 7 },
+    { num: 109, symbol: "Mt", name: "マイトネリウム", period: 7 }, { num: 110, symbol: "Ds", name: "ダームスタチウム", period: 7 },
+    { num: 111, symbol: "Rg", name: "レントゲニウム", period: 7 }, { num: 112, symbol: "Cn", name: "コペルニシウム", period: 7 },
+    { num: 113, symbol: "Nh", name: "ニホニウム", period: 7 }, { num: 114, symbol: "Fl", name: "フレロビウム", period: 7 },
+    { num: 115, symbol: "Mc", name: "モスコビウム", period: 7 }, { num: 116, symbol: "Lv", name: "ライブモリウム", period: 7 },
+    { num: 117, symbol: "Ts", name: "テネシン", period: 7 }, { num: 118, symbol: "Og", name: "オガネソン", period: 7 }
+];
+
+let currentMode = ''; 
+let quizQuestions = [];
+let currentQuestionIndex = 0;
+let score = 0;
+let isAnswered = false;
+let isTrapMode = false; // 特訓モードフラグ
+
+let timeLimitPerQuestion = 0; 
+let currentRemainingTime = 0;
+let timerIntervalId = null;
+
+// 特訓モードにチェックが入ったら通常の周期チェックを外す連動処理
+function togglePeriodCheckboxes(trapCheckbox) {
+    const checkboxes = document.querySelectorAll('.period-checkbox');
+    checkboxes.forEach(cb => {
+        cb.disabled = trapCheckbox.checked;
+        if (trapCheckbox.checked) {
+            cb.checked = false;
+        }
+    });
+}
+
+// 開始前の設定チェック
+function preStartQuiz(mode) {
+    const trapCheckbox = document.getElementById('trap-only-checkbox');
+    isTrapMode = trapCheckbox.checked;
+    
+    let filteredElements = [];
+
+    if (isTrapMode) {
+        // trapGroupが定義されている「紛らわしい元素」だけを抽出（計43種）
+        filteredElements = elementsData.filter(el => el.trapGroup !== undefined);
+    } else {
+        const checkboxes = document.querySelectorAll('.period-checkbox:checked');
+        const selectedPeriods = Array.from(checkboxes).map(cb => parseInt(cb.value));
+
+        if (selectedPeriods.length === 0) {
+            alert('少なくとも1つの周期、または特訓モードを選択してください！');
+            return;
+        }
+        filteredElements = elementsData.filter(el => selectedPeriods.includes(el.period));
+    }
+
+    const timerSetting = parseInt(document.getElementById('timer-setting').value);
+    timeLimitPerQuestion = timerSetting;
+
+    const totalQuestionsCount = Math.min(filteredElements.length, 10);
+    const shuffled = [...filteredElements].sort(() => 0.5 - Math.random());
+    quizQuestions = shuffled.slice(0, totalQuestionsCount);
+
+    startQuiz(mode);
+}
+
+function startQuiz(mode) {
+    currentMode = mode;
+    score = 0;
+    currentQuestionIndex = 0;
+    isAnswered = false;
+
+    document.getElementById('menu-screen').classList.remove('active');
+    document.getElementById('quiz-screen').classList.add('active');
+    
+    const timerDisplay = document.getElementById('timer-display');
+    if (timeLimitPerQuestion > 0) {
+        timerDisplay.style.display = 'inline-block';
+    } else {
+        timerDisplay.style.display = 'none';
+    }
+
+    showQuestion();
+}
+
+function showQuestion() {
+    if (timerIntervalId) clearInterval(timerIntervalId);
+    isAnswered = false;
+    const currentQuestion = quizQuestions[currentQuestionIndex];
+    
+    document.getElementById('progress-text').innerText = `第 ${currentQuestionIndex + 1} / ${quizQuestions.length} 問`;
+    document.getElementById('score-text').innerText = `スコア: ${score}`;
+
+    if (currentMode === 'symbol') {
+        document.getElementById('question-hint').innerText = `次の元素の元素記号は？`;
+        document.getElementById('question-display').innerText = currentQuestion.name;
+    } else {
+        document.getElementById('question-hint').innerText = `元素記号「 ${currentQuestion.symbol} 」の元素名はどれ？`;
+        document.getElementById('question-display').innerText = currentQuestion.symbol;
+    }
+
+    // 選択肢の生成ロジック
+    let choices = [currentQuestion];
+    
+    // 1. もし問題の元素がtrapGroup（似たグループ）を持っていたら、同じグループから優先してダミーを引っ張る
+    if (currentQuestion.trapGroup) {
+        const sameGroupElements = elementsData.filter(el => el.trapGroup === currentQuestion.trapGroup && el.num !== currentQuestion.num);
+        sameGroupElements.sort(() => 0.5 - Math.random());
+        for (let el of sameGroupElements) {
+            if (choices.length < 4) choices.push(el);
+        }
+    }
+
+    // 2. 4つに満たない場合は全体からランダムに補充
+    while (choices.length < 4) {
+        const randomElement = elementsData[Math.floor(Math.random() * elementsData.length)];
+        if (!choices.some(e => e.num === randomElement.num)) {
+            choices.push(randomElement);
+        }
+    }
+    choices.sort(() => 0.5 - Math.random());
+
+    // ボタンに反映
+    const buttons = document.querySelectorAll('.choice-btn');
+    buttons.forEach((btn, index) => {
+        btn.className = 'btn choice-btn';
+        
+        if (currentMode === 'symbol') {
+            btn.innerText = choices[index].symbol;
+            btn.dataset.isCorrect = (choices[index].symbol === currentQuestion.symbol);
+        } else {
+            btn.innerText = choices[index].name;
+            btn.dataset.isCorrect = (choices[index].name === currentQuestion.name);
+        }
+    });
+
+    if (timeLimitPerQuestion > 0) {
+        currentRemainingTime = timeLimitPerQuestion;
+        updateTimerDisplay();
+        timerIntervalId = setInterval(() => {
+            currentRemainingTime--;
+            updateTimerDisplay();
+            if (currentRemainingTime <= 0) {
+                clearInterval(timerIntervalId);
+                handleTimeOut();
+            }
+        }, 1000);
+    }
+}
+
+function updateTimerDisplay() {
+    document.getElementById('timer-display').innerText = `⏱️ ${currentRemainingTime} 秒`;
+}
+
+function handleTimeOut() {
+    if (isAnswered) return;
+    isAnswered = true;
+    const buttons = document.querySelectorAll('.choice-btn');
+    buttons.forEach(btn => {
+        if (btn.dataset.isCorrect === 'true') {
+            btn.classList.add('correct');
+        } else {
+            btn.classList.add('incorrect');
+        }
+    });
+    goToNextQuestion();
+}
+
+function selectAnswer(index) {
+    if (isAnswered) return; 
+    isAnswered = true;
+    if (timerIntervalId) clearInterval(timerIntervalId);
+
+    const buttons = document.querySelectorAll('.choice-btn');
+    const selectedButton = buttons[index];
+    const isCorrect = selectedButton.dataset.isCorrect === 'true';
+
+    if (isCorrect) {
+        selectedButton.classList.add('correct');
+        score++;
+    } else {
+        selectedButton.classList.add('incorrect');
+        buttons.forEach(btn => {
+            if (btn.dataset.isCorrect === 'true') {
+                btn.classList.add('correct');
+            }
+        });
+    }
+    goToNextQuestion();
+}
+
+function goToNextQuestion() {
+    setTimeout(() => {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < quizQuestions.length) {
+            showQuestion();
+        } else {
+            showResult();
+        }
+    }, 1200);
+}
+
+function showResult() {
+    if (timerIntervalId) clearInterval(timerIntervalId);
+    document.getElementById('quiz-screen').classList.remove('active');
+    document.getElementById('result-screen').classList.add('active');
+
+    document.getElementById('final-score').innerText = `${quizQuestions.length}問中 ${score} 問正解！`;
+
+    let comment = '';
+    const rate = score / quizQuestions.length;
+    if (rate === 1) {
+        comment = isTrapMode ? '👑 完璧！おめでとう！' : '🏆 全問正解！素晴らしい！';
+    } else if (rate >= 0.8) {
+        comment = '✨ 惜しい！';
+    } else if (rate >= 0.5) {
+        comment = '👍 悪くない！';
+    } else {
+        comment = '📚 もうちょっと頑張ろう！';
+    }
+
+    document.getElementById('result-comment').innerText = comment;
+}
+
+function backToMenu() {
+    // 特訓モードのチェックを外し、周期チェックボックスの無効化を解除して全チェックを入れるリセット処理
+    const trapCheckbox = document.getElementById('trap-only-checkbox');
+    if (trapCheckbox) {
+        trapCheckbox.checked = false;
+        togglePeriodCheckboxes(trapCheckbox);
+    }
+    
+    const checkboxes = document.querySelectorAll('.period-checkbox');
+    checkboxes.forEach(cb => {
+        cb.checked = true;
+    });
+
+    document.getElementById('result-screen').classList.remove('active');
+    document.getElementById('menu-screen').classList.add('active');
+}
+</script>
+
+</body>
+</html>
